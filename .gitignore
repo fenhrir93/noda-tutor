@@ -1,0 +1,32 @@
+# Node modules
+node_modules/
+
+# Environment files
+.env
+.env.*
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDEs / editors
+.vscode/
+.idea/
+*.sublime-workspace
+
+# Build / output
+dist/
+build/
+coverage/
+
+# Generated CSS (Tailwind output)
+/public/css/tailwind.css
+
+# Misc
+.cache/
+*.log
