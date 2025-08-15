@@ -1,0 +1,15 @@
+<main class='container'>
+  <h1>My Products</h1>
+  <ul>
+    {{#each products}}
+      <li>{{title}}</li>
+      <li><img src="{{imageUrl}}" alt="{{title}}" class="product-image" / width="250" height="250"></li>
+      <li>{{description}}</li>
+      <li>Price: ${{price}}</li>
+      <a href="/products/{{id}}">Details</a>
+      <form action="/cart/{{id}}" method="post">
+      <button type="submit">Add to cart</button>
+      </form>
+    {{/each}}
+  </ul>
+</main>

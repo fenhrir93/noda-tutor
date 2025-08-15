@@ -1,0 +1,16 @@
+<main class='container'>
+  <h1>My Products</h1>
+  <ul>
+    {{#each products}}
+      <ui><div class="card">{{title}}
+          {{description}}
+          <img src="{{imageUrl}}" alt="{{title}}" class="product-image" / width="250" height="250">
+          Price: ${{price}}
+          <a href='/admin/product/{{id}}' class='edit-link'>Edit</a>
+          <form action='/admin/delete-product/{{id}}' method="post">
+            <button type='submit' class='delete-btn'>Delete</button>
+          </form>
+        </div></ui>
+    {{/each}}
+  </ul>
+</main>
