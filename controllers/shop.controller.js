@@ -1,33 +1,27 @@
 const { Cart } = require('../models/cart.model');
 const Product = require('../models/product.model');
+const catchAsync = require('../util/catchAsync');
 const path = require('../util/path');
 
-exports.getProducts = (req, res, next) => {
-  Product.fetchAll((fetchedProducts) => {
-    res.render('shop/product-list', {
-      products: fetchedProducts,
-      path: '/products',
-      pageTitle: 'Shop',
-      cssPath: '/css/shop.css',
-    });
+exports.getProducts = catchAsync(async (req, res, next) => {
+  const products = await Product.fetchAll();
+  res.render('shop/product-list', {
+    products,
+    path: '/products',
+    pageTitle: 'Shop',
+    cssPath: '/css/shop.css',
   });
-};
+});
 
-exports.getProductDetails = (req, res, next) => {
+exports.getProductDetails = catchAsync(async (req, res, next) => {
   const productId = req.params.id;
-  Product.findById(productId, (fetchedProduct) => {
-    console.log('Product found:', fetchedProduct);
-    res.render('shop/product-detail', {
-      product: fetchedProduct,
-      path: `/products/${productId}`,
-      cssPath: '/css/product.css',
-    });
+  const product = await Product.findById(productId);
+  res.render('shop/product-detail', {
+    product,
+    path: `/products/${productId}`,
+    cssPath: '/css/product.css',
   });
-  // res.render('shop/product-details', {
-  //   pageTitle: 'Product Details',
-  //   cssPath: '/css/product-details.css',
-  // });
-};
+});
 
 exports.getIndex = (req, res, next) => {
   res.render('shop/index', {
