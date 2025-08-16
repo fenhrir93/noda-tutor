@@ -119,41 +119,8 @@ const path = require('path');
 const rootDir = require('../util/path');
 const pathToFile = path.join(rootDir, 'data', 'products.json');
 const { nanoid } = require('nanoid');
-
-async function ensureDataFile() {
-  const dir = path.dirname(pathToFile);
-  await fsp.mkdir(dir, { recursive: true });
-  try {
-    await fsp.access(pathToFile, fs.constants.F_OK);
-  } catch {
-    // file doesn't exist — initialize with empty array
-    await fsp.writeFile(pathToFile, '[]', 'utf8');
-  }
-}
-
-async function readProducts() {
-  try {
-    await ensureDataFile();
-    const raw = await fsp.readFile(pathToFile, 'utf8');
-    if (!raw) return [];
-    return JSON.parse(raw);
-  } catch (err) {
-    // If the file somehow disappears between ensure and read, return empty array.
-    if (err.code === 'ENOENT') return [];
-    console.error('Error reading/parsing products file:', err);
-    return [];
-  }
-}
-
-async function writeProducts(products) {
-  try {
-    await ensureDataFile();
-    await fsp.writeFile(pathToFile, JSON.stringify(products, null, 2), 'utf8');
-  } catch (err) {
-    console.error('Error writing products file:', err);
-    throw err;
-  }
-}
+const { readFile, writeFile } = require('../util/fileUtils');
+const catchAsync = require('../util/catchAsync');
 
 class Product {
   constructor(title, imageUrl, description, price) {
@@ -167,27 +134,27 @@ class Product {
   // Save the product. Returns the saved product (with id).
   async save() {
     if (!this.id) this.id = nanoid();
-    const products = await readProducts();
+    const products = await readFile(pathToFile);
     products.push(this);
-    await writeProducts(products);
+    await writeFile(pathToFile, products);
     return this;
   }
 
   // Fetch all products -> returns Promise<array>
   static async fetchAll() {
-    return await readProducts();
+    return await readFile(pathToFile);
   }
 
   // Find a product by id -> returns Promise<product|null>
   static async findById(id) {
-    const products = await readProducts();
+    const products = await readFile(pathToFile);
     return products.find((p) => p && p.id === id) || null;
   }
 
   // Edit product fields; returns the updated product or throws if not found
   // Usage: Product.edit(id, { title, imageUrl, description, price })
   static async edit(id, updates = {}) {
-    const products = await readProducts();
+    const products = await readFile(pathToFile);
     const idx = products.findIndex((p) => p && p.id === id);
     if (idx < 0) {
       const err = new Error(`Product with id ${id} not found`);
@@ -203,13 +170,13 @@ class Product {
     };
 
     products[idx] = updated;
-    await writeProducts(products);
+    await writeFile(pathToFile, products);
     return updated;
   }
 
   // Delete by id; returns deleted product or throws if not found
   static async deleteById(id) {
-    const products = await readProducts();
+    const products = await readFile(pathToFile);
     const idx = products.findIndex((p) => p && p.id === id);
     if (idx < 0) {
       const err = new Error(`Product with id ${id} not found`);
@@ -217,7 +184,7 @@ class Product {
       throw err;
     }
     const [removed] = products.splice(idx, 1);
-    await writeProducts(products);
+    await writeFile(pathToFile, products);
     return removed;
   }
 }
