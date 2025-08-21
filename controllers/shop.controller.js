@@ -1,7 +1,6 @@
-const { Cart } = require('../models/cart.model');
+const Cart = require('../models/cart.model');
 const Product = require('../models/product.model');
 const catchAsync = require('../util/catchAsync');
-const path = require('../util/path');
 
 exports.getProducts = catchAsync(async (req, res, next) => {
   const products = await Product.fetchAll();
@@ -46,25 +45,19 @@ exports.getOrdersController = (req, res, next) => {
   });
 };
 
-exports.getCartController = (req, res, next) => {
+exports.getCartController = async (req, res, next) => {
+  const products = await Cart.getCartItems();
   res.render('shop/cart', {
     pageTitle: 'Your Cart',
     cssPath: '/css/cart.css',
-    products: Cart.getCartItems(),
+    products,
   });
 };
 
-exports.addToCartController = (req, res, next) => {
+exports.addToCartController = catchAsync(async (req, res, next) => {
   const productId = req.params.id;
   const cart = new Cart();
-  Product.findById(productId, (product) => {
-    if (!product) {
-      console.error('Product not found:', productId);
-      return res.status(404).render('404', {
-        pageTitle: 'Product Not Found',
-      });
-    }
-    cart.addProductToCart(product);
-    res.redirect('/products');
-  });
-};
+  const product = await Product.findById(productId);
+  cart.addProductToCart(product);
+  res.redirect('/products');
+});

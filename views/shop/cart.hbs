@@ -6,10 +6,11 @@
         <ul class="cart-list">
             {{#each products}}
                 <li class="cart-item">
-                    <img src="{{imageUrl}}" alt="{{imageUrl}}" class="cart-item-image" />
+                    <img src="{{imageUrl}}" alt="{{title}}" class="cart-item-image" />
                     <div class="cart-item-info">
                         <h2 class="cart-item-name">{{title}}</h2>
                         <div class="cart-item-price">${{price}}</div>
+                        <div class="cart-item-quantity">Quantity: {{quantity}}</div>
                     </div>
                 </li>
             {{/each}}

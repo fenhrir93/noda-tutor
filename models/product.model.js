@@ -113,15 +113,13 @@ module.exports = class Product {
    - Better error handling and consistent JSON formatting
 */
 
-const fs = require('fs');
-const fsp = fs.promises;
 const path = require('path');
 const rootDir = require('../util/path');
-const pathToFile = path.join(rootDir, 'data', 'products.json');
 const { nanoid } = require('nanoid');
 const { readFile, writeFile } = require('../util/fileUtils');
-const catchAsync = require('../util/catchAsync');
+const Cart = require('./cart.model');
 
+const pathToFile = path.join(rootDir, 'data', 'products.json');
 class Product {
   constructor(title, imageUrl, description, price) {
     this.title = title;
@@ -131,7 +129,7 @@ class Product {
     // id is assigned on save if missing
   }
 
-  // Save the product. Returns the saved product (with id).
+  // *Save the product. Returns the saved product (with id).
   async save() {
     if (!this.id) this.id = nanoid();
     const products = await readFile(pathToFile);
@@ -140,19 +138,19 @@ class Product {
     return this;
   }
 
-  // Fetch all products -> returns Promise<array>
+  // *Fetch all products -> returns Promise<array>
   static async fetchAll() {
     return await readFile(pathToFile);
   }
 
-  // Find a product by id -> returns Promise<product|null>
+  // *Find a product by id -> returns Promise<product|null>
   static async findById(id) {
     const products = await readFile(pathToFile);
     return products.find((p) => p && p.id === id) || null;
   }
 
-  // Edit product fields; returns the updated product or throws if not found
-  // Usage: Product.edit(id, { title, imageUrl, description, price })
+  // *Edit product fields; returns the updated product or throws if not found
+  // *Usage: Product.edit(id, { title, imageUrl, description, price })
   static async edit(id, updates = {}) {
     const products = await readFile(pathToFile);
     const idx = products.findIndex((p) => p && p.id === id);
@@ -174,7 +172,7 @@ class Product {
     return updated;
   }
 
-  // Delete by id; returns deleted product or throws if not found
+  //*Delete by id; returns deleted product or throws if not found
   static async deleteById(id) {
     const products = await readFile(pathToFile);
     const idx = products.findIndex((p) => p && p.id === id);
@@ -184,6 +182,7 @@ class Product {
       throw err;
     }
     const [removed] = products.splice(idx, 1);
+    await Cart.removeProductFromCart(id);
     await writeFile(pathToFile, products);
     return removed;
   }
